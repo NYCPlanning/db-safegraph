@@ -4,11 +4,13 @@ DO $$
 DECLARE
     week_exists boolean;
     new_date boolean;
+    _weekend boolean;
     _year_week text;
     query text;
 
 BEGIN
-    SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW') IN (SELECT DISTINCT year_week FROM sg_trips_by_state) INTO week_exists;
+    SELECT EXTRACT(DOW FROM current_setting('myvars.date')::date) IN (6,0) INTO _weekend;
+    SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW')||_weekend::text IN (SELECT DISTINCT year_week||weekend::text FROM sg_trips_by_state) INTO week_exists;
     SELECT current_setting('myvars.date')::text NOT IN (SELECT DISTINCT date FROM state_days_included) INTO new_date;
     SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW') INTO _year_week;
     
@@ -24,13 +26,14 @@ BEGIN
         
         IF NOT week_exists
         THEN
-            RAISE NOTICE 'Loading % to a new week % ', current_setting('myvars.date')::text, _year_week;
+            RAISE NOTICE 'Loading % to a new week % (weekend: %)', current_setting('myvars.date')::text, _year_week, _weekend::text;
             SELECT FORMAT(
                 $inner$
                 WITH pairs AS
                     (
                     SELECT 
                     '%s' as year_week,
+                    '%s' as weekend,
                     origin::text,
                     destination::text,
                     sum(counts) as trips
@@ -62,6 +65,7 @@ BEGIN
                     INSERT INTO sg_trips_by_state
                     SELECT
                     a.year_week,
+                    a.weekend,
                     a.origin as state,
                     a.trips as to_nyc,
                     b.trips as from_nyc,
@@ -71,17 +75,18 @@ BEGIN
                     ON a.origin=b.destination
                     WHERE a.origin <> 'NYC';
 
-            $inner$, _year_week, current_setting('myvars.date'))
+            $inner$, _year_week, _weekend, current_setting('myvars.date'))
             INTO query;
             EXECUTE query;
         ELSE
-            RAISE NOTICE 'Adding % to existing week % ', current_setting('myvars.date')::text, _year_week;
+            RAISE NOTICE 'Adding % to existing week % (weekend: %)', current_setting('myvars.date')::text, _year_week, _weekend::text;
             SELECT FORMAT(
                 $inner$
                 WITH pairs AS
                     (
                     SELECT 
                     '%s' as year_week,
+                    '%s' as weekend,
                     origin::text,
                     destination::text,
                     sum(counts) as trips
@@ -113,6 +118,7 @@ BEGIN
                 daily AS (
                     SELECT
                     a.year_week,
+                    a.weekend,
                     a.origin as state,
                     a.trips as to_nyc,
                     b.trips as from_nyc,
@@ -129,12 +135,13 @@ BEGIN
                     net_nyc = a.net_nyc + b.net_nyc
                 FROM daily b
                 WHERE a.year_week = b.year_week 
+                AND a.weekend::boolean = b.weekend::boolean
                 AND a.state = b.state;
-            $inner$, _year_week, current_setting('myvars.date'))
+            $inner$, _year_week, _weekend, current_setting('myvars.date'))
             INTO query;
             EXECUTE query;
         END IF;
     ELSE
-        RAISE NOTICE '% is already loaded to records for week %', current_setting('myvars.date')::text, _year_week;
+        RAISE NOTICE '% is already loaded to records for week % (weekend: %)', current_setting('myvars.date')::text, _year_week, _weekend::text;
     END IF;
 END $$

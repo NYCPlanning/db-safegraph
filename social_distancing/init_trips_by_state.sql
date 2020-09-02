@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS sg_trips_by_state (
     year_week text,
+    weekend boolean,
     state text,
     to_nyc int,
     from_nyc int,

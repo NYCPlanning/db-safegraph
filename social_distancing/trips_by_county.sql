@@ -84,7 +84,7 @@ BEGIN
                     FROM origin_dest
                     GROUP BY origin, destination) b
                 WHERE a.year_week = b.year_week 
-                AND a.weekend = b.weekend
+                AND a.weekend = b.weekend::boolean
                 AND a.origin = b.origin 
                 AND a.destination = b.destination;
             $inner$, current_setting('myvars.date'), _year_week, _weekend)
