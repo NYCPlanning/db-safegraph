@@ -10,7 +10,7 @@ DECLARE
 
 BEGIN
     SELECT EXTRACT(DOW FROM current_setting('myvars.date')::date) IN (6,0) INTO _weekend;
-    SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW')||_weekend::text IN (SELECT DISTINCT year_week||weekend::text FROM sg_trips_by_state) INTO week_exists;
+    SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW')||_weekend::text IN (SELECT DISTINCT year_week||weekend::text FROM sg_trips_by_state_wknd) INTO week_exists;
     SELECT current_setting('myvars.date')::text NOT IN (SELECT DISTINCT date FROM state_days_included) INTO new_date;
     SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW') INTO _year_week;
     
@@ -62,7 +62,7 @@ BEGIN
                     )) a
                     GROUP BY origin, destination)
 
-                    INSERT INTO sg_trips_by_state
+                    INSERT INTO sg_trips_by_state_wknd
                     SELECT
                     a.year_week,
                     a.weekend,
@@ -129,7 +129,7 @@ BEGIN
                     WHERE a.origin <> 'NYC'
                 )
 
-                UPDATE sg_trips_by_state a
+                UPDATE sg_trips_by_state_wknd a
                 SET to_nyc = a.to_nyc + b.to_nyc,
                     from_nyc = a.from_nyc + b.from_nyc,
                     net_nyc = a.net_nyc + b.net_nyc

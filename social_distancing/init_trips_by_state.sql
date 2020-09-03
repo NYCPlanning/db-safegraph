@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS sg_trips_by_state (
+CREATE TABLE IF NOT EXISTS sg_trips_by_state_wknd (
     year_week text,
     weekend boolean,
     state text,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS sg_trips_by_state (
     net_nyc int
 );
 
-CREATE TABLE IF NOT EXISTS state_days_included (
+CREATE TABLE IF NOT EXISTS state_days_included_wknd (
     year_week text,
     date text
 );

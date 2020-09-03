@@ -10,7 +10,7 @@ DECLARE
 
 BEGIN
     SELECT EXTRACT(DOW FROM current_setting('myvars.date')::date) IN (6,0) INTO _weekend;
-    SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW')||_weekend::text IN (SELECT DISTINCT year_week||weekend::text FROM sg_trips_by_county) INTO week_exists;
+    SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW')||_weekend::text IN (SELECT DISTINCT year_week||weekend::text FROM sg_trips_by_county_wknd) INTO week_exists;
     SELECT current_setting('myvars.date')::text NOT IN (SELECT DISTINCT date FROM county_days_included) INTO new_date;
     SELECT to_char(current_setting('myvars.date')::date, 'IYYY-IW') INTO _year_week;
     
@@ -29,7 +29,7 @@ BEGIN
             RAISE NOTICE 'Loading % to a new week % (weekend: %)', current_setting('myvars.date')::text, _year_week, _weekend::text;
             SELECT FORMAT(
                 $inner$
-                INSERT INTO sg_trips_by_county
+                INSERT INTO sg_trips_by_county_wknd
                 SELECT 
                 '%s' as year_week,
                 '%s' as weekend,
@@ -72,7 +72,7 @@ BEGIN
                         '36', '34', '09', '42', '25', '44', '50', '33' )
                 ) 
 
-                UPDATE sg_trips_by_county a
+                UPDATE sg_trips_by_county_wknd a
                 SET trips = a.trips + b.trips
                 FROM
                     (SELECT 
