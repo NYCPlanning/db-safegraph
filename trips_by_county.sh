@@ -14,4 +14,7 @@ do
     (
          psql $SAFEGRAPH -v DATE=$DATE -f social_distancing/trips_by_county.sql
     ) &
+    (
+        psql $SAFEGRAPH -v DATE=$DATE -f social_distancing/trips_by_county_wknd.sql
+    )
 done;

@@ -1,3 +1,16 @@
+CREATE TABLE IF NOT EXISTS sg_trips_by_county (
+    year_week text,
+    weekend boolean,
+    origin text,
+    destination text,
+    trips int
+);
+
+CREATE TABLE IF NOT EXISTS county_days_included (
+    year_week text,
+    date text
+);
+
 CREATE TABLE IF NOT EXISTS sg_trips_by_county_wknd (
     year_week text,
     weekend boolean,
