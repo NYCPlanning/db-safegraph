@@ -1,7 +1,6 @@
 SET client_encoding = ‘UTF8’;
 
 BEGIN;
-
 CREATE TEMP TABLE tmp (
     safegraph_place_id text,
     parent_safegraph_place_id text,
@@ -27,9 +26,13 @@ CREATE TEMP TABLE tmp (
     tracking_closed_since text
 );
 
-\COPY tmp FROM pstdin WITH NULL AS '' DELIMITER ',' CSV HEADER;
+\COPY tmp FROM pstdin WITH NULL AS '' DELIMITER '|' CSV HEADER;
 
-INSERT INTO core_poi.:"DATE" 
-SELECT * FROM tmp;
+DROP TABLE IF EXISTS core_poi.:"DATE";
+
+SELECT * 
+INTO core_poi.:"DATE" 
+FROM tmp
+WHERE region ~* 'NY|NJ|PA|CT|RI|MA|VT|NH';
 
 COMMIT;
