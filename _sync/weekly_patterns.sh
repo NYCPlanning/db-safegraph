@@ -25,9 +25,7 @@ do
         KEY=$(echo $INFO | jq -r '.key')
         NEW_KEY=$(python3 -c "print('$KEY'.replace('/', '-'))")
         FILENAME=$(basename $KEY)
-        echo "$FILENAME"
         DATE=$(echo $FILENAME | cut -c1-10)
-        echo "$DATE"
         PARTITION="dt=$DATE"
         SUBPATH=$(echo $KEY | cut -c-13)
         if [ "${FILENAME#*.}" = "csv.gz" ]; then
@@ -57,8 +55,9 @@ do
     (
         KEY=$(echo $INFO | jq -r '.key')
         NEW_KEY=$(python3 -c "print('$KEY'.replace('/', '-'))")
+        echo "$NEW_KEY"
         FILENAME=$(basename $KEY)
-        DATE=$(echo $FILENAME | cut -c1-10)
+        DATE=$(echo $NEW_KEY | cut -c10-19)
         PARTITION="dt=$DATE"
         SUBPATH=$(echo $KEY | cut -c-13)
         if  [ "${FILENAME#*.}" = "csv.gz" ]; then
