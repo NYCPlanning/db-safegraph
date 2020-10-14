@@ -25,11 +25,15 @@ do
         KEY=$(echo $INFO | jq -r '.key')
         NEW_KEY=$(python3 -c "print('$KEY'.replace('/', '-'))")
         FILENAME=$(basename $KEY)
+        echo "$FILENAME"
+        DATE=$(echo $FILENAME | cut -c1-10)
+        echo "$DATE"
+        PARTITION="dt=$DATE"
         SUBPATH=$(echo $KEY | cut -c-13)
         if [ "${FILENAME#*.}" = "csv.gz" ]; then
 
             # Check existence
-            STATUS=$(mc stat --json $RDP_BASEPATH/$NEW_KEY | jq -r '.status')
+            STATUS=$(mc stat --json $RDP_BASEPATH/$PARTITION/$NEW_KEY | jq -r '.status')
             
             case $STATUS in
             success)
@@ -37,7 +41,7 @@ do
             ;;
             error)
                 # Download data and unzip, remove README.txt and the original .zip file
-                mc cp $SG_BASEPATH/$KEY $RDP_BASEPATH/$NEW_KEY
+                mc cp $SG_BASEPATH/$KEY $RDP_BASEPATH/$PARTITION/$NEW_KEY
             ;;
             esac
         else echo "ignore $FILENAME"
@@ -54,11 +58,13 @@ do
         KEY=$(echo $INFO | jq -r '.key')
         NEW_KEY=$(python3 -c "print('$KEY'.replace('/', '-'))")
         FILENAME=$(basename $KEY)
+        DATE=$(echo $FILENAME | cut -c1-10)
+        PARTITION="dt=$DATE"
         SUBPATH=$(echo $KEY | cut -c-13)
         if  [ "${FILENAME#*.}" = "csv.gz" ]; then
 
             # Check existence
-            STATUS=$(mc stat --json $RDP_BASEPATH/$NEW_KEY | jq -r '.status')
+            STATUS=$(mc stat --json $RDP_BASEPATH/$PARTITION/$NEW_KEY | jq -r '.status')
             
             case $STATUS in
             success)
@@ -66,7 +72,7 @@ do
             ;;
             error)
                 # Download data and unzip, remove README.txt and the original .zip file
-                mc cp $SG_BASEPATH_NEW/$KEY $RDP_BASEPATH/$NEW_KEY
+                mc cp $SG_BASEPATH_NEW/$KEY $RDP_BASEPATH/$PARTITION/$NEW_KEY
             ;;
             esac
         else echo "ignore $FILENAME"
